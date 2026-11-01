@@ -1,15 +1,18 @@
 #ifndef __ARX_H__
 #define __ARX_H__
 
+#include <cstddef>
+#include <cstdint>
+
 #define ARX_MAGIC_LENGTH 3
 #define ARX_MAX_IDENTIFIER_LENGTH 32
 #define ARX_MAGIC_STR "arx"
 
 namespace arx
 {
-    using u8  =  unsigned __int8;
-    using u16 =  unsigned __int16;
-    using u32 =  unsigned __int32;
+    using u8  =  std::uint8_t;
+    using u16 =  std::uint16_t;
+    using u32 =  std::uint32_t;
 
     typedef long    (*tellFunc)     (void* ptr);
     typedef int     (*seekFunc)     (void* ptr, long offset, int origin);

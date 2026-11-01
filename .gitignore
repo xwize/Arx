@@ -1,0 +1,18 @@
+# CMake build trees
+build/
+out/
+cmake-build-*/
+
+# IDE state
+.vs/
+.idea/
+
+# PyInstaller and Python output
+dist/
+__pycache__/
+
+# Archived project files
+.legacy/
+
+# Tests are local-only for now
+test/
