@@ -16,3 +16,6 @@ __pycache__/
 
 # Tests are local-only for now
 test/
+
+# Local project notes
+CLAUDE.md
