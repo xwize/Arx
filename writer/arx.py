@@ -21,6 +21,8 @@ files = []
 
 for filename in os.listdir(path):
     if(os.path.isfile(path + filename)):
+        if not filename.isascii() or len(filename) > 31:
+            sys.exit(f"Rejected '{filename}': names must be ASCII and at most 31 bytes")
         f = open(path + filename,'rb')
         files.append(Entry(filename,f.read()))
         f.close()
