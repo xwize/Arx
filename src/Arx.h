@@ -10,18 +10,13 @@
 
 namespace arx
 {
-
-typedef long (*TellFunc) (void* ptr);
 typedef int  (*SeekFunc) (void* ptr, long offset, int origin);
 typedef std::size_t  (*ReadFunc) (void* buf, std::size_t elementSize, std::size_t count, void* ptr);
-typedef std::size_t  (*WriteFunc) (void* buf, std::size_t elementSize, std::size_t count, void* ptr);
 
 struct Context
 {
-    TellFunc     tell;
     SeekFunc     seek;
     ReadFunc     read;
-    WriteFunc    write;
     void*        user;
 };
 
@@ -31,6 +26,7 @@ enum class Error
     kIdentifierLength,
     kReadArchiveMagic,
     kMatchArchiveMagic,
+    kNotFound,
     kStreamRead,
     kUnknown
 };
@@ -48,6 +44,7 @@ struct MemberHeader
 };
 
 bool            check_end(const Context& context);
+Error           find_member(const Context& context, const char* ident, MemberHeader* found_out);
 Error           read_archive_header(const Context& context, ArchiveHeader* matched);
 Error           read_member_header(const Context& context, MemberHeader* matched);
 Error           read_member(const Context& context, const MemberHeader& mem_head, void* buf_out, std::size_t buf_size);
@@ -74,6 +71,26 @@ bool check_end(const Context& context)
     }
     context.seek(context.user, -1, SEEK_CUR);
     return false;
+}
+
+Error find_member(const Context& context, const char* ident, MemberHeader* found_out)
+{
+    while (!check_end(context)) {
+
+        MemberHeader mem_head{};
+        if (const Error err = read_member_header(context, &mem_head); err != Error::kNone)
+            return err;
+
+        if (std::strcmp(ident, mem_head.ident) == 0) {
+            if (found_out)
+                *found_out = mem_head;
+            return Error::kNone;
+        }
+
+        skip_member(context, mem_head);
+    }
+
+    return Error::kNotFound;
 }
 
 Error read_archive_header(const Context& context, ArchiveHeader* matched)
@@ -142,24 +159,20 @@ void skip_member(const Context& context, const MemberHeader& mem_head)
 const char* to_string(Error error)
 {
     switch (error) {
-        case Error::kNone:
-            return "None";
-            break;
-        case Error::kIdentifierLength:
-            return "IdentifierLength";
-            break;
-        case Error::kReadArchiveMagic:
-            return "ReadArchiveMagic";
-            break;
-        case Error::kMatchArchiveMagic:
-            return "MatchArchiveMagic";
-            break;
-        case Error::kStreamRead:
-            return "StreamRead";
-            break;
-        case Error::kUnknown:
-            return "Unknown";
-            break;
+    case Error::kNone: return "None";
+        break;
+    case Error::kIdentifierLength: return "IdentifierLength";
+        break;
+    case Error::kReadArchiveMagic: return "ReadArchiveMagic";
+        break;
+    case Error::kMatchArchiveMagic: return "MatchArchiveMagic";
+        break;
+    case Error::kNotFound: return "NotFound";
+        break;
+    case Error::kStreamRead: return "StreamRead";
+        break;
+    case Error::kUnknown: return "Unknown";
+        break;
     };
     assert(false);
     return "Unknown";
