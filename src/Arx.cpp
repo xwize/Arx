@@ -32,7 +32,7 @@ arx::error_ arx::ReadMemberHeader(memberHeader_* matched) {
     }
 
     if (matched->identLen >= ARX_MAX_IDENTIFIER_LENGTH) {
-        return error_::kIdentiferLength;
+        return error_::kIdentifierLength;
     }
 
     numRead = ar.read(matched->ident, 1, matched->identLen, ar.user);
@@ -69,8 +69,14 @@ bool arx::CheckEnd() {
 }
 
 void arx::SkipMember(const memberHeader_& member) {
-    size_t size = member.size;
-    ar.seek(ar.user, size, SEEK_CUR);
+    // The seek callback takes a long, which may only hold 31 bits.
+    const u32 maxStep = 0x7FFFFFFF;
+    u32 remaining = member.size;
+    while (remaining > 0) {
+        u32 step = remaining < maxStep ? remaining : maxStep;
+        ar.seek(ar.user, static_cast<long>(step), SEEK_CUR);
+        remaining -= step;
+    }
 }
 
 const char* arx::to_string(error_ error) {
@@ -78,14 +84,20 @@ const char* arx::to_string(error_ error) {
         case error_::kNone:
             return "None";
             break;
-        case error_::kIdentiferLength:
+        case error_::kIdentifierLength:
             return "IdentifierLength";
             break;
         case error_::kReadArchiveMagic:
             return "ReadArchiveMagic";
             break;
+        case error_::kMatchArchiveMagic:
+            return "MatchArchiveMagic";
+            break;
         case error_::kStreamRead:
             return "StreamRead";
+            break;
+        case error_::kUnknown:
+            return "Unknown";
             break;
     };
     assert(false);

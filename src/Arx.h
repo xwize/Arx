@@ -1,7 +1,6 @@
-#ifndef __ARX_H__
-#define __ARX_H__
+#ifndef ARX_H_
+#define ARX_H_
 
-#include <cstddef>
 #include <cstdint>
 
 #define ARX_MAGIC_LENGTH 3
@@ -29,7 +28,7 @@ namespace arx
 
     enum class error_ {
         kNone,
-        kIdentiferLength,
+        kIdentifierLength,
         kReadArchiveMagic,
         kMatchArchiveMagic,
         kStreamRead,
@@ -48,6 +47,7 @@ namespace arx
         char    ident[ARX_MAX_IDENTIFIER_LENGTH + 1];
         u32     size;
     };
+#pragma pack(pop)
 
     void            UseContext(const context_& callbacks);
     error_          ReadArchiveHeader(archiveHeader_* matched);
@@ -57,4 +57,4 @@ namespace arx
     void            SkipMember(const memberHeader_& memHead);
 }
 
-#endif // __ARX_H__
+#endif // ARX_H_
