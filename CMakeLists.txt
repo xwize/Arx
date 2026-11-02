@@ -12,7 +12,8 @@ else()
     add_compile_options(-Wall -Wextra -Werror)
 endif()
 
-add_library(arx STATIC src/Arx.cpp src/Arx.h)
+add_library(arx STATIC src/Arx.h
+        src/Arx.cpp)
 target_include_directories(arx PUBLIC src)
 
 # test/ is not tracked yet, so a fresh clone builds the library only.
